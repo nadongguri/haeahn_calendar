@@ -50,7 +50,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
           }
         });
         if (signUpError) throw signUpError;
-        setStatus("Check your email to verify your account before signing in.");
+        setStatus("가입 확인 메일을 보냈습니다. 이메일 인증 후 로그인해 주세요.");
         setPassword("");
       }
 
@@ -62,7 +62,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
           }
         );
         if (resetError) throw resetError;
-        setStatus("Password reset email sent. Check your inbox.");
+        setStatus("비밀번호 재설정 메일을 보냈습니다. 메일함을 확인해 주세요.");
       }
 
       if (mode === "updatePassword") {
@@ -70,16 +70,13 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
           password: newPassword
         });
         if (updateError) throw updateError;
-        setStatus("Password updated. You can continue to the app.");
+        setStatus("비밀번호가 변경되었습니다. 계속 이용하실 수 있습니다.");
         setNewPassword("");
         onPasswordUpdated?.();
       }
     } catch (caughtError) {
-      setError(
-        caughtError instanceof Error
-          ? caughtError.message
-          : "Authentication failed. Please try again."
-      );
+      void caughtError;
+      setError(getKoreanAuthError(mode));
     } finally {
       setSubmitting(false);
     }
@@ -87,12 +84,12 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
 
   const title =
     mode === "signup"
-      ? "Create your account"
+      ? "회원가입"
       : mode === "reset"
-        ? "Reset password"
+        ? "비밀번호 재설정"
         : mode === "updatePassword"
-          ? "Set a new password"
-          : "Sign in";
+          ? "새 비밀번호 설정"
+          : "로그인";
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
@@ -102,21 +99,21 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
         </p>
         <h1 className="mt-2 text-2xl font-bold text-ink">{title}</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Sign in with an email address or the shared meeting ID. Email is only
-          sent for signup verification and password reset.
+          이메일 또는 공용 ID로 로그인하세요. 메일은 회원가입 인증과 비밀번호
+          재설정 때만 발송됩니다.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           {mode !== "updatePassword" && (
             <label className="block">
               <span className="text-sm font-medium text-ink">
-                {mode === "login" ? "Email or ID" : "Email"}
+                {mode === "login" ? "이메일 또는 ID" : "이메일"}
               </span>
               <input
                 className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                 autoCapitalize="none"
                 autoCorrect="off"
-                placeholder={mode === "login" ? "meeting or email@example.com" : ""}
+                placeholder={mode === "login" ? "meeting 또는 email@example.com" : ""}
                 required
                 type={mode === "login" ? "text" : "email"}
                 value={email}
@@ -127,7 +124,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
 
           {(mode === "login" || mode === "signup") && (
             <label className="block">
-              <span className="text-sm font-medium text-ink">Password</span>
+              <span className="text-sm font-medium text-ink">비밀번호</span>
               <input
                 className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                 minLength={8}
@@ -141,7 +138,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
 
           {mode === "updatePassword" && (
             <label className="block">
-              <span className="text-sm font-medium text-ink">New password</span>
+              <span className="text-sm font-medium text-ink">새 비밀번호</span>
               <input
                 className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                 minLength={8}
@@ -170,7 +167,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
             disabled={submitting}
             type="submit"
           >
-            {submitting ? "Working..." : title}
+            {submitting ? "처리 중..." : title}
           </button>
         </form>
 
@@ -182,7 +179,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
                 type="button"
                 onClick={() => setMode("login")}
               >
-                Back to sign in
+                로그인으로 돌아가기
               </button>
             )}
             {mode !== "signup" && (
@@ -191,7 +188,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
                 type="button"
                 onClick={() => setMode("signup")}
               >
-                Create account
+                회원가입
               </button>
             )}
             {mode !== "reset" && (
@@ -200,7 +197,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
                 type="button"
                 onClick={() => setMode("reset")}
               >
-                Forgot password
+                비밀번호 찾기
               </button>
             )}
           </div>
@@ -213,4 +210,20 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
 function normalizeLoginIdentifier(identifier: string) {
   const trimmedIdentifier = identifier.trim();
   return loginAliases[trimmedIdentifier.toLowerCase()] ?? trimmedIdentifier;
+}
+
+function getKoreanAuthError(mode: Mode) {
+  if (mode === "login") {
+    return "아이디 또는 비밀번호를 확인해 주세요.";
+  }
+
+  if (mode === "signup") {
+    return "회원가입 처리 중 오류가 발생했습니다. 이메일과 비밀번호를 확인해 주세요.";
+  }
+
+  if (mode === "reset") {
+    return "비밀번호 재설정 메일을 보내지 못했습니다. 이메일을 확인해 주세요.";
+  }
+
+  return "비밀번호 변경 중 오류가 발생했습니다. 다시 시도해 주세요.";
 }

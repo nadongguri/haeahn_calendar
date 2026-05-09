@@ -67,6 +67,7 @@ Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are required
 7. Add deployed Cloudflare Pages URLs to Redirect URLs after deployment.
 8. Open SQL Editor and run `supabase/schema.sql`.
 9. Run `supabase/seed.sql` to add sample meeting rooms.
+10. If older sample rooms already exist, run `supabase/single-room.sql` once to keep only `미팅룸` active.
 
 For production, configure a custom SMTP provider in Supabase Auth so signup verification and password reset emails are reliable.
 

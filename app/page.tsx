@@ -40,10 +40,10 @@ export default function Home() {
       <main className="flex min-h-screen items-center justify-center px-4">
         <section className="w-full max-w-xl rounded-lg border border-line bg-white p-6 shadow-soft">
           <p className="text-sm font-semibold uppercase tracking-wide text-accent">
-            Configuration required
+            설정 필요
           </p>
           <h1 className="mt-2 text-2xl font-bold text-ink">
-            Add Supabase environment variables
+            Supabase 환경변수를 추가해 주세요
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted">
             Copy <code className="rounded bg-panel px-1">.env.example</code> to{" "}
@@ -53,7 +53,7 @@ export default function Home() {
             <code className="rounded bg-panel px-1">
               NEXT_PUBLIC_SUPABASE_ANON_KEY
             </code>
-            .
+            값을 설정해 주세요.
           </p>
         </section>
       </main>
@@ -64,7 +64,7 @@ export default function Home() {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <div className="rounded-lg border border-line bg-white px-5 py-4 text-sm font-medium text-muted shadow-soft">
-          Loading workspace...
+          작업 공간을 불러오는 중...
         </div>
       </main>
     );

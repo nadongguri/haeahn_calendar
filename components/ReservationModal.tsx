@@ -90,14 +90,14 @@ export function ReservationModal({
           <div>
             <h2 className="text-lg font-bold text-ink">
               {mode === "create"
-                ? "New reservation"
+                ? "새 예약"
                 : mode === "edit"
-                  ? "Edit reservation"
-                  : "Reservation details"}
+                  ? "예약 수정"
+                  : "예약 상세"}
             </h2>
             {reservation && (
               <p className="mt-1 text-sm text-muted">
-                Organized by {reservation.organizer_email}
+                예약자: {reservation.organizer_email}
               </p>
             )}
           </div>
@@ -106,7 +106,7 @@ export function ReservationModal({
             type="button"
             onClick={onClose}
           >
-            Close
+            닫기
           </button>
         </div>
 
@@ -120,7 +120,7 @@ export function ReservationModal({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
-              <span className="text-sm font-medium text-ink">Start</span>
+              <span className="text-sm font-medium text-ink">시작</span>
               <input
                 className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
                 disabled={isReadOnly}
@@ -132,7 +132,7 @@ export function ReservationModal({
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium text-ink">End</span>
+              <span className="text-sm font-medium text-ink">종료</span>
               <input
                 className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
                 disabled={isReadOnly}
@@ -145,7 +145,7 @@ export function ReservationModal({
           </div>
 
           <fieldset className="block">
-            <legend className="text-sm font-medium text-ink">Meeting room</legend>
+            <legend className="text-sm font-medium text-ink">회의실</legend>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               {rooms.map((room) => {
                 const selected = values.roomId === room.id;
@@ -167,10 +167,10 @@ export function ReservationModal({
                     <span className="mt-1 block text-xs text-muted">
                       {[
                         room.location,
-                        room.capacity ? `${room.capacity} people` : null
+                        room.capacity ? `${room.capacity}명` : null
                       ]
                         .filter(Boolean)
-                        .join(" · ") || "Meeting room"}
+                        .join(" · ") || "회의실"}
                     </span>
                   </button>
                 );
@@ -179,7 +179,7 @@ export function ReservationModal({
           </fieldset>
 
           <label className="block">
-            <span className="text-sm font-medium text-ink">Title</span>
+            <span className="text-sm font-medium text-ink">회의 제목</span>
             <input
               className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
               disabled={isReadOnly}
@@ -191,7 +191,7 @@ export function ReservationModal({
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-ink">Description</span>
+            <span className="text-sm font-medium text-ink">설명</span>
             <textarea
               className="mt-1 min-h-24 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
               disabled={isReadOnly}
@@ -203,7 +203,7 @@ export function ReservationModal({
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-ink">Attendees</span>
+            <span className="text-sm font-medium text-ink">참석자</span>
             <input
               className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
               disabled={isReadOnly}
@@ -223,9 +223,9 @@ export function ReservationModal({
             />
             <span>
               <span className="block font-semibold text-ink">
-                Send notification email
+                알림 메일 보내기
               </span>
-              Feature temporarily disabled
+              현재 비활성화된 기능입니다
             </span>
           </label>
 
@@ -244,7 +244,7 @@ export function ReservationModal({
                   type="button"
                   onClick={() => onDelete(reservation.id)}
                 >
-                  Delete
+                  삭제
                 </button>
               )}
             </div>
@@ -255,7 +255,7 @@ export function ReservationModal({
                 type="button"
                 onClick={onClose}
               >
-                Cancel
+                취소
               </button>
               {!isReadOnly && (
                 <button
@@ -263,7 +263,7 @@ export function ReservationModal({
                   disabled={submitting}
                   type="submit"
                 >
-                  {submitting ? "Saving..." : "Confirm"}
+                  {submitting ? "저장 중..." : "확인"}
                 </button>
               )}
             </div>

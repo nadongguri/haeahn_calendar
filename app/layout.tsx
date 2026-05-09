@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "haeahn_calendar",
-  description: "Small-team meeting-room reservation app"
+  description: "회의실 예약 앱"
 };
 
 export default function RootLayout({

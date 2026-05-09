@@ -1,3 +1,5 @@
+-- Existing Supabase projects can run this once to keep only one active room.
+
 begin;
 
 update public.rooms

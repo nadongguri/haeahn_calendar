@@ -5,6 +5,7 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import koLocale from "@fullcalendar/core/locales/ko";
 import type { DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
 import { ReservationModal } from "@/components/ReservationModal";
 import { dateTimeLocalToIso, parseAttendees } from "@/lib/date";
@@ -51,28 +52,41 @@ export function ReservationCalendar({
   const [modalError, setModalError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [modal, setModal] = useState<ModalState>(null);
+  const [mobileReadOnly, setMobileReadOnly] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
 
-    const [roomsResult, reservationsResult] = await Promise.all([
-      supabase
-        .from("rooms")
-        .select("id, name, location, capacity, active")
-        .eq("active", true)
-        .order("name", { ascending: true }),
-      supabase
-        .from("reservations")
-        .select(reservationSelect)
-        .order("start_time", { ascending: true })
-    ]);
+    const roomsResult = await supabase
+      .from("rooms")
+      .select("id, name, location, capacity, active")
+      .eq("active", true)
+      .order("name", { ascending: true });
 
     if (roomsResult.error) {
       setError(roomsResult.error.message);
-    } else {
-      setRooms((roomsResult.data ?? []) as Room[]);
+      setLoading(false);
+      return;
     }
+
+    const activeRooms = (roomsResult.data ?? []) as Room[];
+    setRooms(activeRooms);
+
+    if (activeRooms.length === 0) {
+      setReservations([]);
+      setLoading(false);
+      return;
+    }
+
+    const reservationsResult = await supabase
+      .from("reservations")
+      .select(reservationSelect)
+      .in(
+        "room_id",
+        activeRooms.map((room) => room.id)
+      )
+      .order("start_time", { ascending: true });
 
     if (reservationsResult.error) {
       setError(reservationsResult.error.message);
@@ -95,10 +109,23 @@ export function ReservationCalendar({
     loadData();
   }, [loadData]);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+
+    function syncMobileState() {
+      setMobileReadOnly(mediaQuery.matches);
+    }
+
+    syncMobileState();
+    mediaQuery.addEventListener("change", syncMobileState);
+
+    return () => mediaQuery.removeEventListener("change", syncMobileState);
+  }, []);
+
   const events = useMemo<EventInput[]>(() => {
     return reservations.map((reservation) => {
       const ownReservation = reservation.organizer_user_id === userId;
-      const roomName = reservation.rooms?.name ?? "Room";
+      const roomName = reservation.rooms?.name ?? "회의실";
       return {
         id: reservation.id,
         title: `${roomName}: ${reservation.title}`,
@@ -115,8 +142,12 @@ export function ReservationCalendar({
 
   function openCreateModal(selection: DateSelectArg) {
     setModalError("");
+    if (mobileReadOnly) {
+      return;
+    }
+
     if (rooms.length === 0) {
-      setError("Add at least one active room before creating reservations.");
+      setError("예약을 만들려면 활성화된 회의실이 필요합니다.");
       return;
     }
 
@@ -133,7 +164,10 @@ export function ReservationCalendar({
       .reservation as ReservationWithRoom;
     setModalError("");
     setModal({
-      kind: reservation.organizer_user_id === userId ? "edit" : "view",
+      kind:
+        !mobileReadOnly && reservation.organizer_user_id === userId
+          ? "edit"
+          : "view",
       start: null,
       end: null,
       reservation
@@ -148,13 +182,13 @@ export function ReservationCalendar({
     const endIso = dateTimeLocalToIso(values.end);
 
     if (new Date(endIso) <= new Date(startIso)) {
-      setModalError("End time must be after start time.");
+      setModalError("종료 시간은 시작 시간보다 늦어야 합니다.");
       setSubmitting(false);
       return;
     }
 
     if (!values.roomId) {
-      setModalError("Select a meeting room before saving.");
+      setModalError("회의실을 선택해 주세요.");
       setSubmitting(false);
       return;
     }
@@ -218,9 +252,9 @@ export function ReservationCalendar({
         <header className="flex flex-col gap-3 rounded-lg border border-line bg-white px-4 py-4 shadow-soft sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-accent">
-              Meeting rooms
+              회의실 예약
             </p>
-            <h1 className="text-2xl font-bold text-ink">Room reservations</h1>
+            <h1 className="text-2xl font-bold text-ink">해안 회의실 예약</h1>
           </div>
           <div className="flex flex-col gap-2 text-sm sm:items-end">
             <span className="break-all text-muted">{userEmail}</span>
@@ -229,10 +263,17 @@ export function ReservationCalendar({
               type="button"
               onClick={onSignOut}
             >
-              Sign out
+              로그아웃
             </button>
           </div>
         </header>
+
+        {mobileReadOnly && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 md:hidden">
+            모바일에서는 현재 예약 조회만 가능합니다. 예약 생성, 수정, 삭제는
+            PC에서 진행해 주세요.
+          </div>
+        )}
 
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -242,7 +283,7 @@ export function ReservationCalendar({
 
         {loading ? (
           <div className="rounded-lg border border-line bg-white px-4 py-10 text-center text-sm font-medium text-muted shadow-soft">
-            Loading reservations...
+            예약 정보를 불러오는 중...
           </div>
         ) : rooms.length === 0 ? (
           <EmptyRoomsState />
@@ -259,9 +300,16 @@ export function ReservationCalendar({
               }}
               height="auto"
               initialView="timeGridWeek"
+              locale={koLocale}
               nowIndicator
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-              selectable
+              buttonText={{
+                today: "오늘",
+                month: "월",
+                week: "주",
+                day: "일"
+              }}
+              selectable={!mobileReadOnly}
               selectMirror
               select={openCreateModal}
               slotMinTime="07:00:00"
@@ -295,15 +343,15 @@ function EmptyRoomsState() {
   return (
     <section className="rounded-lg border border-dashed border-line bg-white px-5 py-12 text-center shadow-soft">
       <p className="text-sm font-semibold uppercase tracking-wide text-accent">
-        No rooms
+        회의실 없음
       </p>
       <h2 className="mt-2 text-xl font-bold text-ink">
-        Add meeting rooms in Supabase
+        Supabase에 회의실을 추가해 주세요
       </h2>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted">
-        Run the seed SQL from <code className="rounded bg-panel px-1">README.md</code>{" "}
-        or insert active rows into <code className="rounded bg-panel px-1">rooms</code>.
-        The calendar will appear after at least one active room exists.
+        <code className="rounded bg-panel px-1">README.md</code>의 seed SQL을 실행하거나{" "}
+        <code className="rounded bg-panel px-1">rooms</code> 테이블에 활성 회의실을
+        추가해 주세요. 활성 회의실이 하나 이상 있어야 캘린더가 표시됩니다.
       </p>
     </section>
   );
@@ -317,11 +365,11 @@ function toFriendlyReservationError(error: { code?: string; message: string }) {
     message.includes("reservations_room_time_no_overlap") ||
     message.includes("conflicting key value violates exclusion constraint")
   ) {
-    return "That room is already booked for the selected time. Choose a different room or time range.";
+    return "선택한 시간에는 이미 회의실이 예약되어 있습니다. 다른 시간을 선택해 주세요.";
   }
 
   if (error.code === "42501" || message.includes("row-level security")) {
-    return "You do not have permission to change that reservation.";
+    return "이 예약을 변경할 권한이 없습니다.";
   }
 
   return error.message;
