@@ -153,6 +153,12 @@ export function ReservationCalendar({
       return;
     }
 
+    if (!values.roomId) {
+      setModalError("Select a meeting room before saving.");
+      setSubmitting(false);
+      return;
+    }
+
     const payload = {
       room_id: values.roomId,
       title: values.title.trim(),

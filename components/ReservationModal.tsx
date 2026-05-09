@@ -144,24 +144,39 @@ export function ReservationModal({
             </label>
           </div>
 
-          <label className="block">
-            <span className="text-sm font-medium text-ink">Meeting room</span>
-            <select
-              className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
-              disabled={isReadOnly}
-              required
-              value={values.roomId}
-              onChange={(event) => updateValue("roomId", event.target.value)}
-            >
-              {rooms.map((room) => (
-                <option key={room.id} value={room.id}>
-                  {room.name}
-                  {room.location ? ` - ${room.location}` : ""}
-                  {room.capacity ? ` (${room.capacity})` : ""}
-                </option>
-              ))}
-            </select>
-          </label>
+          <fieldset className="block">
+            <legend className="text-sm font-medium text-ink">Meeting room</legend>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+              {rooms.map((room) => {
+                const selected = values.roomId === room.id;
+
+                return (
+                  <button
+                    key={room.id}
+                    aria-pressed={selected}
+                    className={`min-h-16 rounded-md border px-3 py-2 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-70 ${
+                      selected
+                        ? "border-accent bg-teal-50 text-ink ring-2 ring-accent/20"
+                        : "border-line bg-white text-ink hover:bg-panel"
+                    }`}
+                    disabled={isReadOnly}
+                    type="button"
+                    onClick={() => updateValue("roomId", room.id)}
+                  >
+                    <span className="block font-semibold">{room.name}</span>
+                    <span className="mt-1 block text-xs text-muted">
+                      {[
+                        room.location,
+                        room.capacity ? `${room.capacity} people` : null
+                      ]
+                        .filter(Boolean)
+                        .join(" · ") || "Meeting room"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
 
           <label className="block">
             <span className="text-sm font-medium text-ink">Title</span>

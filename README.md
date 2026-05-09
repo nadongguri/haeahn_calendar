@@ -70,6 +70,20 @@ Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are required
 
 For production, configure a custom SMTP provider in Supabase Auth so signup verification and password reset emails are reliable.
 
+## Shared Account
+
+A shared room-booking account can be created in Supabase Auth, but it should be created through the Supabase Dashboard rather than seeded with SQL. Auth users are managed by Supabase Auth, not by the public application schema.
+
+Recommended setup:
+
+1. Create a real shared mailbox, for example `calendar@your-company.com`.
+2. In Supabase Dashboard, go to Authentication > Users.
+3. Add a new user with the shared mailbox and a strong password.
+4. Mark the email as confirmed if the dashboard offers that option, or complete the confirmation email from the mailbox.
+5. Share the credentials only with the intended internal team.
+
+Using a shared account means all reservations created by that login are owned by the same Supabase user. For per-person ownership and auditability, individual accounts are still preferred.
+
 ## Database Schema and RLS
 
 The complete schema, constraints, triggers, grants, and RLS policies are in:
