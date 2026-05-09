@@ -1,0 +1,21 @@
+# Setup Checklist
+
+- [ ] Create Supabase project.
+- [ ] Enable email/password Auth.
+- [ ] Keep signup email confirmation enabled.
+- [ ] Avoid Magic Link or OTP as the normal login flow.
+- [ ] Add local URL to Supabase Auth Site URL: `http://localhost:3000`.
+- [ ] Create a Cloudflare account.
+- [ ] Create or use a GitHub account.
+- [ ] Push this repo to GitHub.
+- [ ] Add deployed Cloudflare Pages URLs to Supabase Auth Redirect URLs.
+- [ ] Run `supabase/schema.sql` in Supabase SQL Editor.
+- [ ] Run `supabase/seed.sql` for sample rooms.
+- [ ] Copy `.env.example` to `.env.local`.
+- [ ] Set `NEXT_PUBLIC_SUPABASE_URL`.
+- [ ] Set `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- [ ] Run `npm install`.
+- [ ] Run `npm run dev`.
+- [ ] Deploy to Cloudflare Pages.
+- [ ] Set production environment variables.
+- [ ] Configure custom SMTP before real production usage.

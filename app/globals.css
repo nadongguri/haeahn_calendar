@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  background: #eef3f7;
+  color: #17202a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(238, 243, 247, 0.94)),
+    #eef3f7;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.fc {
+  --fc-border-color: #d9e1ea;
+  --fc-button-bg-color: #ffffff;
+  --fc-button-border-color: #c9d4df;
+  --fc-button-text-color: #17202a;
+  --fc-button-hover-bg-color: #eef3f7;
+  --fc-button-hover-border-color: #aab7c4;
+  --fc-button-active-bg-color: #0f766e;
+  --fc-button-active-border-color: #0f766e;
+  --fc-today-bg-color: rgba(15, 118, 110, 0.08);
+  --fc-event-bg-color: #0f766e;
+  --fc-event-border-color: #0f766e;
+  --fc-event-text-color: #ffffff;
+  color: #17202a;
+}
+
+.fc .fc-toolbar {
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.fc .fc-toolbar-title {
+  font-size: clamp(1.1rem, 2vw, 1.55rem);
+  font-weight: 700;
+}
+
+.fc .fc-button {
+  border-radius: 6px;
+  box-shadow: none;
+  font-weight: 600;
+  padding: 0.42rem 0.7rem;
+  text-transform: capitalize;
+}
+
+.fc .fc-event {
+  border-radius: 5px;
+  padding: 1px 3px;
+}
+
+.fc .fc-timegrid-slot {
+  height: 2.35rem;
+}
+
+@media (max-width: 720px) {
+  .fc .fc-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .fc .fc-toolbar-chunk {
+    max-width: 100%;
+  }
+
+  .fc .fc-button {
+    padding: 0.35rem 0.55rem;
+  }
+}
