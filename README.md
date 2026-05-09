@@ -76,6 +76,22 @@ A shared room-booking account can be created in Supabase Auth, but it should be 
 
 Recommended setup:
 
+1. In Supabase Dashboard, go to Authentication > Users.
+2. Add a new user with this email:
+   ```text
+   meeting@haeahn-calendar.local
+   ```
+3. Set a strong password and store it in your team password manager.
+4. Mark the email as confirmed if the dashboard offers that option. If Supabase requires a real confirmation email, use a real shared mailbox instead.
+5. Users can sign in from the app with:
+   ```text
+   ID: meeting
+   ```
+
+The app maps `meeting` to `meeting@haeahn-calendar.local` before calling Supabase Auth. Other users can still sign in with regular email/password accounts.
+
+Alternative setup with a real mailbox:
+
 1. Create a real shared mailbox, for example `calendar@your-company.com`.
 2. In Supabase Dashboard, go to Authentication > Users.
 3. Add a new user with the shared mailbox and a strong password.

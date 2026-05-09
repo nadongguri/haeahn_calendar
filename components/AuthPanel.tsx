@@ -5,6 +5,10 @@ import { supabase } from "@/lib/supabase";
 
 type Mode = "login" | "signup" | "reset" | "updatePassword";
 
+const loginAliases: Record<string, string> = {
+  meeting: "meeting@haeahn-calendar.local"
+};
+
 type AuthPanelProps = {
   initialMode: Mode;
   onPasswordUpdated?: () => void;
@@ -31,7 +35,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
     try {
       if (mode === "login") {
         const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
+          email: normalizeLoginIdentifier(email),
           password
         });
         if (signInError) throw signInError;
@@ -98,18 +102,23 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
         </p>
         <h1 className="mt-2 text-2xl font-bold text-ink">{title}</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Email/password authentication is used for normal sign-in. Email is
-          only sent for signup verification and password reset.
+          Sign in with an email address or the shared meeting ID. Email is only
+          sent for signup verification and password reset.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
           {mode !== "updatePassword" && (
             <label className="block">
-              <span className="text-sm font-medium text-ink">Email</span>
+              <span className="text-sm font-medium text-ink">
+                {mode === "login" ? "Email or ID" : "Email"}
+              </span>
               <input
                 className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
+                autoCapitalize="none"
+                autoCorrect="off"
+                placeholder={mode === "login" ? "meeting or email@example.com" : ""}
                 required
-                type="email"
+                type={mode === "login" ? "text" : "email"}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
               />
@@ -199,4 +208,9 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
       </section>
     </main>
   );
+}
+
+function normalizeLoginIdentifier(identifier: string) {
+  const trimmedIdentifier = identifier.trim();
+  return loginAliases[trimmedIdentifier.toLowerCase()] ?? trimmedIdentifier;
 }
