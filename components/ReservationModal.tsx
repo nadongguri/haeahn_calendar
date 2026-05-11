@@ -158,7 +158,7 @@ export function ReservationModal({
                     aria-pressed={selected}
                     className={`min-h-16 rounded-md border px-3 py-2 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-70 ${
                       selected
-                        ? "border-accent bg-teal-50 text-ink ring-2 ring-accent/20"
+                        ? "border-accent bg-blue-50 text-ink ring-2 ring-accent/20"
                         : "border-line bg-white text-ink hover:bg-panel"
                     }`}
                     disabled={isReadOnly}
@@ -261,7 +261,7 @@ export function ReservationModal({
               </button>
               {!isReadOnly && (
                 <button
-                  className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={submitting}
                   type="submit"
                 >

@@ -1,4 +1,23 @@
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+@font-face {
+  font-family: "KoPubDotum";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/KoPubDotumPM.woff") format("woff");
+}
+
+@font-face {
+  font-family: "KoPubDotum";
+  font-style: normal;
+  font-weight: 700;
+  src: url("/fonts/KoPubDotumPB.woff") format("woff");
+}
+
+@font-face {
+  font-family: "HaeahnNoto";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/NotoSans-Regular.woff") format("woff");
+}
 
 @tailwind base;
 @tailwind components;
@@ -6,8 +25,8 @@
 
 :root {
   color-scheme: light;
-  background: #eef3f7;
-  color: #17202a;
+  background: #f2f2f2;
+  color: #4c5868;
 }
 
 * {
@@ -18,12 +37,12 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(238, 243, 247, 0.94)),
-    #eef3f7;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(242, 242, 242, 0.96)),
+    #f2f2f2;
   font-family:
-    Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic",
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+    "KoPubDotum", "HaeahnNoto", "Apple SD Gothic Neo", "Noto Sans KR",
+    "Malgun Gothic", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 button,
@@ -34,19 +53,19 @@ textarea {
 }
 
 .fc {
-  --fc-border-color: #d9e1ea;
+  --fc-border-color: #c9cdd1;
   --fc-button-bg-color: #ffffff;
-  --fc-button-border-color: #c9d4df;
-  --fc-button-text-color: #17202a;
-  --fc-button-hover-bg-color: #eef3f7;
-  --fc-button-hover-border-color: #aab7c4;
-  --fc-button-active-bg-color: #0f766e;
-  --fc-button-active-border-color: #0f766e;
-  --fc-today-bg-color: rgba(15, 118, 110, 0.08);
-  --fc-event-bg-color: #0f766e;
-  --fc-event-border-color: #0f766e;
+  --fc-button-border-color: #c9cdd1;
+  --fc-button-text-color: #4c5868;
+  --fc-button-hover-bg-color: #f2f2f2;
+  --fc-button-hover-border-color: #a5abb3;
+  --fc-button-active-bg-color: #0e4e96;
+  --fc-button-active-border-color: #0e4e96;
+  --fc-today-bg-color: rgba(63, 168, 223, 0.10);
+  --fc-event-bg-color: #0e4e96;
+  --fc-event-border-color: #0e4e96;
   --fc-event-text-color: #ffffff;
-  color: #17202a;
+  color: #4c5868;
 }
 
 .fc .fc-toolbar {

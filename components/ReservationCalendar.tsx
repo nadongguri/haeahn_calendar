@@ -131,8 +131,8 @@ export function ReservationCalendar({
         title: `${roomName}: ${reservation.title}`,
         start: reservation.start_time,
         end: reservation.end_time,
-        backgroundColor: ownReservation ? "#0f766e" : "#475467",
-        borderColor: ownReservation ? "#0f766e" : "#475467",
+        backgroundColor: ownReservation ? "#0e4e96" : "#a5abb3",
+        borderColor: ownReservation ? "#0e4e96" : "#a5abb3",
         extendedProps: {
           reservation
         }

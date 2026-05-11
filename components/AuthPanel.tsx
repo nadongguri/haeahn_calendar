@@ -163,7 +163,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
           )}
 
           <button
-            className="w-full rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="w-full rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={submitting}
             type="submit"
           >
@@ -175,7 +175,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
           <div className="mt-5 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
             {mode !== "login" && (
               <button
-                className="font-medium text-accent hover:text-teal-800"
+                className="font-medium text-accent hover:text-blue-900"
                 type="button"
                 onClick={() => setMode("login")}
               >
@@ -184,7 +184,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
             )}
             {mode !== "signup" && (
               <button
-                className="font-medium text-accent hover:text-teal-800"
+                className="font-medium text-accent hover:text-blue-900"
                 type="button"
                 onClick={() => setMode("signup")}
               >
@@ -193,7 +193,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
             )}
             {mode !== "reset" && (
               <button
-                className="font-medium text-accent hover:text-teal-800"
+                className="font-medium text-accent hover:text-blue-900"
                 type="button"
                 onClick={() => setMode("reset")}
               >
