@@ -79,6 +79,14 @@ export function ReservationModal({
     }
   }
 
+  function handleDelete(reservationId: string) {
+    const confirmed = window.confirm("정말 삭제하시겠습니까?");
+
+    if (confirmed) {
+      onDelete(reservationId);
+    }
+  }
+
   return (
     <div
       aria-modal="true"
@@ -244,7 +252,7 @@ export function ReservationModal({
                   className="rounded-md border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={submitting}
                   type="button"
-                  onClick={() => onDelete(reservation.id)}
+                  onClick={() => handleDelete(reservation.id)}
                 >
                   삭제
                 </button>
