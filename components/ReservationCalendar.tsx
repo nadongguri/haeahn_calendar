@@ -302,7 +302,7 @@ export function ReservationCalendar({
               headerToolbar={{
                 left: "prev,next today",
                 center: "title",
-                right: "dayGridMonth,timeGridWeek,timeGridDay"
+                right: "dayGridMonth,timeGridWeek"
               }}
               height="auto"
               initialView="timeGridWeek"
@@ -312,8 +312,7 @@ export function ReservationCalendar({
               buttonText={{
                 today: "오늘",
                 month: "월",
-                week: "주",
-                day: "일"
+                week: "주"
               }}
               selectable={!mobileReadOnly}
               selectMirror
