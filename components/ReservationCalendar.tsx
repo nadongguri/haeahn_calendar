@@ -319,8 +319,8 @@ export function ReservationCalendar({
               selectable={!mobileReadOnly}
               selectMirror
               select={openCreateModal}
-              slotMinTime="07:00:00"
-              slotMaxTime="21:00:00"
+              slotMinTime="08:00:00"
+              slotMaxTime="18:00:00"
               slotDuration="00:10:00"
               slotLabelFormat={{
                 hour: "2-digit",
@@ -329,6 +329,11 @@ export function ReservationCalendar({
               }}
               snapDuration="00:10:00"
               weekends
+              views={{
+                timeGridWeek: {
+                  weekends: false
+                }
+              }}
             />
           </section>
         )}

@@ -212,33 +212,6 @@ export function ReservationModal({
             />
           </label>
 
-          <label className="block">
-            <span className="text-sm font-medium text-ink">참석자</span>
-            <input
-              className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
-              disabled={isReadOnly}
-              placeholder="a@example.com, b@example.com"
-              value={values.attendees}
-              onChange={(event) => updateValue("attendees", event.target.value)}
-            />
-          </label>
-
-          <label className="flex items-start gap-3 rounded-md border border-dashed border-line bg-panel px-3 py-3 text-sm text-muted">
-            <input
-              checked={false}
-              className="mt-1"
-              disabled
-              type="checkbox"
-              onChange={() => updateValue("sendNotification", false)}
-            />
-            <span>
-              <span className="block font-semibold text-ink">
-                알림 메일 보내기
-              </span>
-              현재 비활성화된 기능입니다
-            </span>
-          </label>
-
           {error && (
             <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
               {error}
