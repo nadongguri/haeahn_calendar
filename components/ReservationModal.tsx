@@ -125,6 +125,7 @@ export function ReservationModal({
                 className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
                 disabled={isReadOnly}
                 required
+                step={600}
                 type="datetime-local"
                 value={values.start}
                 onChange={(event) => updateValue("start", event.target.value)}
@@ -137,6 +138,7 @@ export function ReservationModal({
                 className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
                 disabled={isReadOnly}
                 required
+                step={600}
                 type="datetime-local"
                 value={values.end}
                 onChange={(event) => updateValue("end", event.target.value)}
@@ -179,7 +181,7 @@ export function ReservationModal({
           </fieldset>
 
           <label className="block">
-            <span className="text-sm font-medium text-ink">회의 제목</span>
+            <span className="text-sm font-medium text-ink">예약자</span>
             <input
               className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
               disabled={isReadOnly}
@@ -191,7 +193,7 @@ export function ReservationModal({
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-ink">설명</span>
+            <span className="text-sm font-medium text-ink">내용</span>
             <textarea
               className="mt-1 min-h-24 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
               disabled={isReadOnly}

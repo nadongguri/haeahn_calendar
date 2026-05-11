@@ -187,6 +187,12 @@ export function ReservationCalendar({
       return;
     }
 
+    if (!isTenMinuteBoundary(startIso) || !isTenMinuteBoundary(endIso)) {
+      setModalError("예약 시간은 10분 단위로 선택해 주세요.");
+      setSubmitting(false);
+      return;
+    }
+
     if (!values.roomId) {
       setModalError("회의실을 선택해 주세요.");
       setSubmitting(false);
@@ -252,9 +258,9 @@ export function ReservationCalendar({
         <header className="flex flex-col gap-3 rounded-lg border border-line bg-white px-4 py-4 shadow-soft sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wide text-accent">
-              회의실 예약
+              9층 회의실
             </p>
-            <h1 className="text-2xl font-bold text-ink">해안 회의실 예약</h1>
+            <h1 className="text-2xl font-bold text-ink">9층 회의실 예약</h1>
           </div>
           <div className="flex flex-col gap-2 text-sm sm:items-end">
             <span className="break-all text-muted">{userEmail}</span>
@@ -314,6 +320,8 @@ export function ReservationCalendar({
               select={openCreateModal}
               slotMinTime="07:00:00"
               slotMaxTime="21:00:00"
+              slotDuration="00:10:00"
+              snapDuration="00:10:00"
               weekends
             />
           </section>
@@ -373,4 +381,13 @@ function toFriendlyReservationError(error: { code?: string; message: string }) {
   }
 
   return error.message;
+}
+
+function isTenMinuteBoundary(value: string) {
+  const date = new Date(value);
+  return (
+    date.getSeconds() === 0 &&
+    date.getMilliseconds() === 0 &&
+    date.getMinutes() % 10 === 0
+  );
 }
