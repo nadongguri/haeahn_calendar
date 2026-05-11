@@ -322,6 +322,11 @@ export function ReservationCalendar({
               slotMinTime="07:00:00"
               slotMaxTime="21:00:00"
               slotDuration="00:10:00"
+              slotLabelFormat={{
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+              }}
               snapDuration="00:10:00"
               weekends
             />

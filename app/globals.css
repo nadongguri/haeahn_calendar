@@ -103,12 +103,12 @@ textarea {
 
 .fc .fc-timegrid-axis,
 .fc .fc-timegrid-slot-label {
-  width: 96px;
-  min-width: 96px;
+  width: 72px;
+  min-width: 72px;
 }
 
 .fc .fc-timegrid col:first-child {
-  width: 96px;
+  width: 72px;
 }
 
 .fc .fc-timegrid-slot-label {
@@ -118,7 +118,9 @@ textarea {
 
 .fc .fc-timegrid-slot-label-cushion {
   height: 100%;
-  padding: 0 10px;
+  max-width: none;
+  min-width: 72px;
+  padding: 0 8px;
   text-align: center;
   width: 100%;
 }
@@ -126,6 +128,23 @@ textarea {
 .fc .fc-timegrid-axis-cushion,
 .fc .fc-timegrid-slot-label-frame {
   height: 100%;
+  max-width: none;
+  min-width: 72px;
+  overflow: visible;
+  width: 72px;
+}
+
+.fc .fc-timegrid-axis-frame,
+.fc .fc-timegrid-slot-label-frame.fc-scrollgrid-shrink-frame {
+  min-width: 72px;
+  overflow: visible;
+  width: 72px;
+}
+
+.fc .fc-timegrid-axis-cushion.fc-scrollgrid-shrink-cushion,
+.fc .fc-timegrid-slot-label-cushion.fc-scrollgrid-shrink-cushion {
+  max-width: none;
+  min-width: 72px;
 }
 
 @media (max-width: 720px) {
