@@ -76,6 +76,16 @@ textarea {
   height: 2.35rem;
 }
 
+.fc .fc-timegrid-slot-label {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.fc .fc-timegrid-slot-label-cushion {
+  display: block;
+  text-align: center;
+}
+
 @media (max-width: 720px) {
   .fc .fc-toolbar {
     align-items: flex-start;
