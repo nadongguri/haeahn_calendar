@@ -101,22 +101,9 @@ textarea {
   height: 2.35rem;
 }
 
-.fc .fc-timegrid-slot-label {
-  text-align: center;
-  vertical-align: middle;
-}
-
 .fc .fc-timegrid-slot-label-cushion {
-  display: block;
-  max-width: none;
   padding: 0 6px;
   text-align: center;
-  width: 100%;
-}
-
-.fc .fc-timegrid-slot-label-frame,
-.fc .fc-timegrid-slot-label-cushion.fc-scrollgrid-shrink-cushion {
-  max-width: none;
 }
 
 @media (max-width: 720px) {
