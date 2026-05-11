@@ -103,19 +103,23 @@ textarea {
 
 .fc .fc-timegrid-axis,
 .fc .fc-timegrid-slot-label {
-  width: 78px;
-  min-width: 78px;
+  width: 96px;
+  min-width: 96px;
+}
+
+.fc .fc-timegrid col:first-child {
+  width: 96px;
 }
 
 .fc .fc-timegrid-slot-label {
-  text-align: right;
+  text-align: center;
   vertical-align: middle;
 }
 
 .fc .fc-timegrid-slot-label-cushion {
   height: 100%;
-  padding: 0 10px 0 6px;
-  text-align: right;
+  padding: 0 10px;
+  text-align: center;
   width: 100%;
 }
 
