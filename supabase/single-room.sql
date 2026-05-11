@@ -4,10 +4,10 @@ begin;
 
 update public.rooms
 set active = false
-where name <> '미팅룸';
+where name <> '9층 회의실';
 
 insert into public.rooms (name, location, capacity, active)
-values ('미팅룸', '해안', 8, true)
+values ('9층 회의실', '9층', 8, true)
 on conflict (name)
 do update set
   location = excluded.location,
