@@ -101,50 +101,22 @@ textarea {
   height: 2.35rem;
 }
 
-.fc .fc-timegrid-axis,
-.fc .fc-timegrid-slot-label {
-  width: 72px;
-  min-width: 72px;
-}
-
-.fc .fc-timegrid col:first-child {
-  width: 72px;
-}
-
 .fc .fc-timegrid-slot-label {
   text-align: center;
   vertical-align: middle;
 }
 
 .fc .fc-timegrid-slot-label-cushion {
-  height: 100%;
+  display: block;
   max-width: none;
-  min-width: 72px;
-  padding: 0 8px;
+  padding: 0 6px;
   text-align: center;
   width: 100%;
 }
 
-.fc .fc-timegrid-axis-cushion,
-.fc .fc-timegrid-slot-label-frame {
-  height: 100%;
-  max-width: none;
-  min-width: 72px;
-  overflow: visible;
-  width: 72px;
-}
-
-.fc .fc-timegrid-axis-frame,
-.fc .fc-timegrid-slot-label-frame.fc-scrollgrid-shrink-frame {
-  min-width: 72px;
-  overflow: visible;
-  width: 72px;
-}
-
-.fc .fc-timegrid-axis-cushion.fc-scrollgrid-shrink-cushion,
+.fc .fc-timegrid-slot-label-frame,
 .fc .fc-timegrid-slot-label-cushion.fc-scrollgrid-shrink-cushion {
   max-width: none;
-  min-width: 72px;
 }
 
 @media (max-width: 720px) {
