@@ -151,10 +151,12 @@ export function ReservationCalendar({
       return;
     }
 
+    const defaultSelection = getDefaultCreateRange(selection);
+
     setModal({
       kind: "create",
-      start: selection.start,
-      end: selection.end,
+      start: defaultSelection.start,
+      end: defaultSelection.end,
       reservation: null
     });
   }
@@ -389,4 +391,21 @@ function isTenMinuteBoundary(value: string) {
     date.getMilliseconds() === 0 &&
     date.getMinutes() % 10 === 0
   );
+}
+
+function getDefaultCreateRange(selection: DateSelectArg) {
+  if (!selection.allDay) {
+    return {
+      start: selection.start,
+      end: selection.end
+    };
+  }
+
+  const start = new Date(selection.start);
+  start.setHours(9, 0, 0, 0);
+
+  const end = new Date(selection.start);
+  end.setHours(10, 0, 0, 0);
+
+  return { start, end };
 }
