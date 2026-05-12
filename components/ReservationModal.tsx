@@ -26,6 +26,8 @@ type ReservationModalProps = {
   onSubmit: (values: ReservationFormValues) => void;
 };
 
+const timeOptions = createTimeOptions();
+
 export function ReservationModal({
   mode,
   rooms,
@@ -127,31 +129,19 @@ export function ReservationModal({
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="text-sm font-medium text-ink">시작</span>
-              <input
-                className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
-                disabled={isReadOnly}
-                required
-                step={600}
-                type="datetime-local"
-                value={values.start}
-                onChange={(event) => updateValue("start", event.target.value)}
-              />
-            </label>
+            <DateTimeFields
+              disabled={isReadOnly}
+              label="시작"
+              value={values.start}
+              onChange={(value) => updateValue("start", value)}
+            />
 
-            <label className="block">
-              <span className="text-sm font-medium text-ink">종료</span>
-              <input
-                className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
-                disabled={isReadOnly}
-                required
-                step={600}
-                type="datetime-local"
-                value={values.end}
-                onChange={(event) => updateValue("end", event.target.value)}
-              />
-            </label>
+            <DateTimeFields
+              disabled={isReadOnly}
+              label="종료"
+              value={values.end}
+              onChange={(value) => updateValue("end", value)}
+            />
           </div>
 
           <fieldset className="block">
@@ -255,4 +245,77 @@ export function ReservationModal({
       </section>
     </div>
   );
+}
+
+function DateTimeFields({
+  disabled,
+  label,
+  value,
+  onChange
+}: {
+  disabled: boolean;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const date = getDatePart(value);
+  const time = getTimePart(value);
+
+  return (
+    <fieldset>
+      <legend className="text-sm font-medium text-ink">{label}</legend>
+      <div className="mt-1 grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
+        <input
+          className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
+          disabled={disabled}
+          required
+          type="date"
+          value={date}
+          onChange={(event) => onChange(combineDateAndTime(event.target.value, time))}
+        />
+        <select
+          className="w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
+          disabled={disabled}
+          required
+          value={time}
+          onChange={(event) => onChange(combineDateAndTime(date, event.target.value))}
+        >
+          {timeOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
+    </fieldset>
+  );
+}
+
+function createTimeOptions() {
+  const options: string[] = [];
+
+  for (let hour = 8; hour <= 18; hour += 1) {
+    for (let minute = 0; minute < 60; minute += 10) {
+      if (hour === 18 && minute > 0) {
+        break;
+      }
+
+      options.push(`${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`);
+    }
+  }
+
+  return options;
+}
+
+function getDatePart(value: string) {
+  return value.split("T")[0] ?? "";
+}
+
+function getTimePart(value: string) {
+  const time = value.split("T")[1]?.slice(0, 5) ?? "08:00";
+  return timeOptions.includes(time) ? time : "08:00";
+}
+
+function combineDateAndTime(date: string, time: string) {
+  return `${date}T${time}`;
 }
