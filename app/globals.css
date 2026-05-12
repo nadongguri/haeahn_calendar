@@ -52,6 +52,33 @@ textarea {
   font: inherit;
 }
 
+input,
+textarea {
+  background-color: #ffffff;
+  color: #4c5868;
+  -webkit-text-fill-color: #4c5868;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #707985;
+  -webkit-text-fill-color: #707985;
+}
+
+input[type="password"] {
+  color: #4c5868;
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  -webkit-text-fill-color: #4c5868;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 1000px #ffffff inset;
+  -webkit-text-fill-color: #4c5868;
+}
+
 .fc {
   --fc-border-color: #c9cdd1;
   --fc-button-bg-color: #ffffff;
