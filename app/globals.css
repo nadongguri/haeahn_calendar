@@ -102,7 +102,7 @@ input:-webkit-autofill:focus {
 }
 
 .fc .fc-toolbar-title {
-  font-size: clamp(1.1rem, 2vw, 1.55rem);
+  font-size: 1.375rem;
   font-weight: 700;
 }
 
@@ -131,6 +131,45 @@ input:-webkit-autofill:focus {
 .fc .fc-timegrid-slot-label-cushion {
   padding: 0 6px;
   text-align: center;
+}
+
+.reservation-modal input,
+.reservation-modal select,
+.reservation-modal textarea {
+  min-height: 44px;
+  font-size: 1rem;
+}
+
+@media (max-width: 767px) {
+  .fc .fc-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .fc .fc-daygrid-block-event {
+    min-height: 44px;
+    padding: 2px 1px;
+    font-size: 12px;
+  }
+
+  .fc .fc-daygrid-block-event .fc-event-main-frame {
+    flex-direction: column;
+  }
+
+  .fc .fc-daygrid-block-event .fc-event-time {
+    display: block;
+    margin: 0;
+    font-size: 10px;
+  }
+
+  .fc .fc-daygrid-block-event .fc-event-title {
+    display: -webkit-box;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
 }
 
 @media (max-width: 720px) {

@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import type { DateClickArg } from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import koLocale from "@fullcalendar/core/locales/ko";
 import type { DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
@@ -52,7 +53,8 @@ export function ReservationCalendar({
   const [modalError, setModalError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [modal, setModal] = useState<ModalState>(null);
-  const [mobileReadOnly, setMobileReadOnly] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const calendarRef = useRef<FullCalendar>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -113,7 +115,7 @@ export function ReservationCalendar({
     const mediaQuery = window.matchMedia("(max-width: 767px)");
 
     function syncMobileState() {
-      setMobileReadOnly(mediaQuery.matches);
+      setIsMobile(mediaQuery.matches);
     }
 
     syncMobileState();
@@ -128,23 +130,22 @@ export function ReservationCalendar({
       const roomName = reservation.rooms?.name ?? "회의실";
       return {
         id: reservation.id,
-        title: `${roomName}: ${reservation.title}`,
+        title: isMobile ? reservation.title : `${roomName}: ${reservation.title}`,
         start: reservation.start_time,
         end: reservation.end_time,
-        backgroundColor: ownReservation ? "#0e4e96" : "#a5abb3",
-        borderColor: ownReservation ? "#0e4e96" : "#a5abb3",
+        backgroundColor: ownReservation ? "#0e4e96" : "#626d7b",
+        borderColor: ownReservation ? "#0e4e96" : "#626d7b",
         extendedProps: {
           reservation
         }
       };
     });
-  }, [reservations, userId]);
+  }, [reservations, userId, isMobile]);
 
-  function openCreateModal(selection: DateSelectArg) {
+  function openCreateModal(
+    selection: Pick<DateSelectArg, "start" | "end" | "allDay">
+  ) {
     setModalError("");
-    if (mobileReadOnly) {
-      return;
-    }
 
     if (rooms.length === 0) {
       setError("예약을 만들려면 활성화된 회의실이 필요합니다.");
@@ -161,13 +162,33 @@ export function ReservationCalendar({
     });
   }
 
+  function openNewReservation() {
+    const date = calendarRef.current?.getApi().getDate() ?? new Date();
+    openCreateModal({ start: date, end: date, allDay: true });
+  }
+
+  function openTappedDate(clickInfo: DateClickArg) {
+    if (!isMobile) return;
+
+    const start = new Date(clickInfo.date);
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    const closingTime = new Date(start);
+    closingTime.setHours(18, 0, 0, 0);
+
+    openCreateModal({
+      start,
+      end: end > closingTime ? closingTime : end,
+      allDay: clickInfo.allDay
+    });
+  }
+
   function openEventModal(clickInfo: EventClickArg) {
     const reservation = clickInfo.event.extendedProps
       .reservation as ReservationWithRoom;
     setModalError("");
     setModal({
       kind:
-        !mobileReadOnly && reservation.organizer_user_id === userId
+        reservation.organizer_user_id === userId
           ? "edit"
           : "view",
       start: null,
@@ -177,8 +198,18 @@ export function ReservationCalendar({
   }
 
   async function saveReservation(values: ReservationFormValues) {
+    if (submitting) return;
     setSubmitting(true);
     setModalError("");
+
+    if (
+      !Number.isFinite(new Date(values.start).getTime()) ||
+      !Number.isFinite(new Date(values.end).getTime())
+    ) {
+      setModalError("시작과 종료 날짜 및 시간을 확인해 주세요.");
+      setSubmitting(false);
+      return;
+    }
 
     const startIso = dateTimeLocalToIso(values.start);
     const endIso = dateTimeLocalToIso(values.end);
@@ -266,22 +297,25 @@ export function ReservationCalendar({
           </div>
           <div className="flex flex-col gap-2 text-sm sm:items-end">
             <span className="break-all text-muted">{userEmail}</span>
-            <button
-              className="rounded-md border border-line px-3 py-2 font-semibold text-ink transition hover:bg-panel"
-              type="button"
-              onClick={onSignOut}
-            >
-              로그아웃
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                className="min-h-11 rounded-md bg-accent px-4 py-2 font-semibold text-white transition hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={loading || rooms.length === 0 || isMobile === null}
+                type="button"
+                onClick={openNewReservation}
+              >
+                새 예약
+              </button>
+              <button
+                className="min-h-11 rounded-md border border-line px-3 py-2 font-semibold text-ink transition hover:bg-panel"
+                type="button"
+                onClick={onSignOut}
+              >
+                로그아웃
+              </button>
+            </div>
           </div>
         </header>
-
-        {mobileReadOnly && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 md:hidden">
-            모바일에서는 현재 예약 조회만 가능합니다. 예약 생성, 수정, 삭제는
-            PC에서 진행해 주세요.
-          </div>
-        )}
 
         {error && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -289,17 +323,25 @@ export function ReservationCalendar({
           </div>
         )}
 
-        {loading ? (
+        {(loading && rooms.length === 0) || isMobile === null ? (
           <div className="rounded-lg border border-line bg-white px-4 py-10 text-center text-sm font-medium text-muted shadow-soft">
             예약 정보를 불러오는 중...
           </div>
         ) : rooms.length === 0 ? (
           <EmptyRoomsState />
         ) : (
-          <section className="rounded-lg border border-line bg-white p-3 shadow-soft sm:p-4">
+          <section aria-busy={loading} className="rounded-lg border border-line bg-white p-3 shadow-soft sm:p-4">
             <FullCalendar
+              ref={calendarRef}
               allDaySlot={false}
+              dateClick={openTappedDate}
+              dayCellContent={(info) =>
+                isMobile ? String(info.date.getDate()) : info.dayNumberText
+              }
+              dayMaxEvents={isMobile ? 2 : false}
+              eventDisplay={isMobile ? "block" : "auto"}
               eventClick={openEventModal}
+              eventTimeFormat={{ hour: "2-digit", minute: "2-digit", hour12: false }}
               events={events}
               headerToolbar={{
                 left: "prev,next today",
@@ -307,7 +349,7 @@ export function ReservationCalendar({
                 right: "dayGridMonth,timeGridWeek"
               }}
               height="auto"
-              initialView="timeGridWeek"
+              initialView={isMobile ? "dayGridMonth" : "timeGridWeek"}
               locale={koLocale}
               nowIndicator
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -316,7 +358,7 @@ export function ReservationCalendar({
                 month: "월",
                 week: "주"
               }}
-              selectable={!mobileReadOnly}
+              selectable={!isMobile}
               selectMirror
               select={openCreateModal}
               slotMinTime="08:00:00"
@@ -403,7 +445,9 @@ function isTenMinuteBoundary(value: string) {
   );
 }
 
-function getDefaultCreateRange(selection: DateSelectArg) {
+function getDefaultCreateRange(
+  selection: Pick<DateSelectArg, "start" | "end" | "allDay">
+) {
   if (!selection.allDay) {
     return {
       start: selection.start,

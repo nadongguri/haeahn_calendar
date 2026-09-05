@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useId, useMemo, useState } from "react";
 import {
   attendeesToInput,
   formatDateTime,
@@ -43,6 +43,15 @@ export function ReservationModal({
 }: ReservationModalProps) {
   const isReadOnly = mode === "view";
   const canDelete = mode === "edit" && reservation?.organizer_user_id === currentUserId;
+  const titleId = useId();
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
 
   const initialValues = useMemo<ReservationFormValues>(() => {
     return {
@@ -76,7 +85,7 @@ export function ReservationModal({
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!isReadOnly) {
+    if (!isReadOnly && !submitting) {
       onSubmit(values);
     }
   }
@@ -91,14 +100,15 @@ export function ReservationModal({
 
   return (
     <div
+      aria-labelledby={titleId}
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-8"
+      className="reservation-modal fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4"
       role="dialog"
     >
-      <section className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-line bg-white shadow-soft">
-        <div className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
-          <div>
-            <h2 className="text-lg font-bold text-ink">
+      <section className="max-h-[calc(100dvh-2rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-lg border border-line bg-white shadow-soft">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-white px-5 py-4">
+          <div className="min-w-0">
+            <h2 id={titleId} className="text-lg font-bold text-ink">
               {mode === "create"
                 ? "새 예약"
                 : mode === "edit"
@@ -106,13 +116,14 @@ export function ReservationModal({
                   : "예약 상세"}
             </h2>
             {reservation && (
-              <p className="mt-1 text-sm text-muted">
+              <p className="mt-1 break-all text-sm text-muted">
                 예약자: {reservation.organizer_email}
               </p>
             )}
           </div>
           <button
-            className="rounded-md border border-line px-3 py-1.5 text-sm font-semibold text-ink transition hover:bg-panel"
+            className="min-h-11 shrink-0 rounded-md border border-line px-3 py-1.5 text-sm font-semibold text-ink transition hover:bg-panel disabled:opacity-60"
+            disabled={submitting}
             type="button"
             onClick={onClose}
           >
@@ -128,7 +139,7 @@ export function ReservationModal({
             </div>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             <DateTimeFields
               disabled={isReadOnly}
               label="시작"
@@ -212,7 +223,7 @@ export function ReservationModal({
             <div>
               {canDelete && reservation && (
                 <button
-                  className="rounded-md border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="min-h-11 rounded-md border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={submitting}
                   type="button"
                   onClick={() => handleDelete(reservation.id)}
@@ -224,7 +235,8 @@ export function ReservationModal({
 
             <div className="flex gap-2">
               <button
-                className="rounded-md border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:bg-panel"
+                className="min-h-11 rounded-md border border-line px-4 py-2 text-sm font-semibold text-ink transition hover:bg-panel disabled:opacity-60"
+                disabled={submitting}
                 type="button"
                 onClick={onClose}
               >
@@ -232,7 +244,7 @@ export function ReservationModal({
               </button>
               {!isReadOnly && (
                 <button
-                  className="rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="min-h-11 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={submitting}
                   type="submit"
                 >
@@ -262,11 +274,12 @@ function DateTimeFields({
   const time = getTimePart(value);
 
   return (
-    <fieldset>
+    <fieldset className="min-w-0">
       <legend className="text-sm font-medium text-ink">{label}</legend>
-      <div className="mt-1 grid grid-cols-[minmax(0,1fr)_7rem] gap-2">
+      <div className="mt-1 grid grid-cols-1 gap-2 min-[380px]:grid-cols-[minmax(0,1fr)_7rem]">
         <input
-          className="w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
+          aria-label={`${label} 날짜`}
+          className="min-w-0 w-full rounded-md border border-line px-3 py-2 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
           disabled={disabled}
           required
           type="date"
@@ -274,12 +287,16 @@ function DateTimeFields({
           onChange={(event) => onChange(combineDateAndTime(event.target.value, time))}
         />
         <select
+          aria-label={`${label} 시간`}
           className="w-full rounded-md border border-line bg-white px-3 py-2 text-sm text-ink outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20 disabled:bg-panel disabled:text-muted"
           disabled={disabled}
           required
           value={time}
           onChange={(event) => onChange(combineDateAndTime(date, event.target.value))}
         >
+          {!timeOptions.includes(time) && (
+            <option disabled value={time}>{time}</option>
+          )}
           {timeOptions.map((option) => (
             <option key={option} value={option}>
               {option}
@@ -312,8 +329,7 @@ function getDatePart(value: string) {
 }
 
 function getTimePart(value: string) {
-  const time = value.split("T")[1]?.slice(0, 5) ?? "08:00";
-  return timeOptions.includes(time) ? time : "08:00";
+  return value.split("T")[1]?.slice(0, 5) ?? "08:00";
 }
 
 function combineDateAndTime(date: string, time: string) {
