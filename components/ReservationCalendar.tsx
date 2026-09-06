@@ -9,7 +9,11 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import koLocale from "@fullcalendar/core/locales/ko";
 import type { DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
 import { ReservationModal } from "@/components/ReservationModal";
-import { dateTimeLocalToIso, parseAttendees } from "@/lib/date";
+import {
+  dateTimeLocalToIso,
+  parseAttendees,
+  RESERVATION_INTERVAL_MINUTES
+} from "@/lib/date";
 import { supabase } from "@/lib/supabase";
 import type {
   ReservationFormValues,
@@ -171,7 +175,7 @@ export function ReservationCalendar({
     if (!isMobile) return;
 
     const start = new Date(clickInfo.date);
-    const end = new Date(start.getTime() + 60 * 60 * 1000);
+    const end = new Date(start.getTime() + RESERVATION_INTERVAL_MINUTES * 60_000);
     const closingTime = new Date(start);
     closingTime.setHours(18, 0, 0, 0);
 
@@ -220,8 +224,13 @@ export function ReservationCalendar({
       return;
     }
 
-    if (!isTenMinuteBoundary(startIso) || !isTenMinuteBoundary(endIso)) {
-      setModalError("예약 시간은 10분 단위로 선택해 주세요.");
+    const existingReservation = modal?.kind === "edit" ? modal.reservation : null;
+    const timeUnchanged = existingReservation &&
+      new Date(startIso).getTime() === new Date(existingReservation.start_time).getTime() &&
+      new Date(endIso).getTime() === new Date(existingReservation.end_time).getTime();
+
+    if (!timeUnchanged && (!isReservationBoundary(startIso) || !isReservationBoundary(endIso))) {
+      setModalError(`예약 시간은 ${RESERVATION_INTERVAL_MINUTES}분 단위로 선택해 주세요.`);
       setSubmitting(false);
       return;
     }
@@ -293,7 +302,7 @@ export function ReservationCalendar({
             <p className="text-sm font-semibold uppercase tracking-wide text-accent">
               9층 회의실
             </p>
-            <h1 className="text-2xl font-bold text-ink">9층 회의실 예약</h1>
+            <h1 className="text-xl font-bold text-ink sm:text-2xl">9층 회의실 예약</h1>
           </div>
           <div className="flex flex-col gap-2 text-sm sm:items-end">
             <span className="break-all text-muted">{userEmail}</span>
@@ -335,9 +344,6 @@ export function ReservationCalendar({
               ref={calendarRef}
               allDaySlot={false}
               dateClick={openTappedDate}
-              dayCellContent={(info) =>
-                isMobile ? String(info.date.getDate()) : info.dayNumberText
-              }
               dayMaxEvents={isMobile ? 2 : false}
               eventDisplay={isMobile ? "block" : "auto"}
               eventClick={openEventModal}
@@ -363,15 +369,20 @@ export function ReservationCalendar({
               select={openCreateModal}
               slotMinTime="08:00:00"
               slotMaxTime="18:00:00"
-              slotDuration="00:10:00"
+              slotDuration={{ minutes: RESERVATION_INTERVAL_MINUTES }}
+              slotLabelInterval={{ minutes: RESERVATION_INTERVAL_MINUTES }}
               slotLabelFormat={{
                 hour: "2-digit",
                 minute: "2-digit",
                 hour12: false
               }}
-              snapDuration="00:10:00"
+              snapDuration={{ minutes: RESERVATION_INTERVAL_MINUTES }}
               weekends
               views={{
+                dayGridMonth: {
+                  dayCellContent: (info) =>
+                    isMobile ? String(info.date.getDate()) : info.dayNumberText
+                },
                 timeGridWeek: {
                   weekends: false
                 }
@@ -436,12 +447,12 @@ function toFriendlyReservationError(error: { code?: string; message: string }) {
   return error.message;
 }
 
-function isTenMinuteBoundary(value: string) {
+function isReservationBoundary(value: string) {
   const date = new Date(value);
   return (
     date.getSeconds() === 0 &&
     date.getMilliseconds() === 0 &&
-    date.getMinutes() % 10 === 0
+    date.getMinutes() % RESERVATION_INTERVAL_MINUTES === 0
   );
 }
 

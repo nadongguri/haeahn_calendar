@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useId, useMemo, useState } from "react";
 import {
   attendeesToInput,
   formatDateTime,
+  RESERVATION_INTERVAL_MINUTES,
   toDateTimeLocalValue
 } from "@/lib/date";
 import type {
@@ -312,7 +313,7 @@ function createTimeOptions() {
   const options: string[] = [];
 
   for (let hour = 8; hour <= 18; hour += 1) {
-    for (let minute = 0; minute < 60; minute += 10) {
+    for (let minute = 0; minute < 60; minute += RESERVATION_INTERVAL_MINUTES) {
       if (hour === 18 && minute > 0) {
         break;
       }

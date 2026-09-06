@@ -1,3 +1,5 @@
+export const RESERVATION_INTERVAL_MINUTES = 30;
+
 export function toDateTimeLocalValue(value: Date | string) {
   const date = typeof value === "string" ? new Date(value) : value;
   const offsetMs = date.getTimezoneOffset() * 60_000;

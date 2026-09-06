@@ -141,6 +141,19 @@ input:-webkit-autofill:focus {
 }
 
 @media (max-width: 767px) {
+  .fc {
+    font-size: 13px;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1rem;
+  }
+
+  .fc .fc-col-header-cell-cushion,
+  .fc .fc-timegrid-slot-label-cushion {
+    font-size: 12px;
+  }
+
   .fc .fc-button {
     min-height: 44px;
     min-width: 44px;
