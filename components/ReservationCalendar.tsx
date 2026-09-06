@@ -7,7 +7,12 @@ import interactionPlugin from "@fullcalendar/interaction";
 import type { DateClickArg } from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import koLocale from "@fullcalendar/core/locales/ko";
-import type { DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
+import type {
+  DateSelectArg,
+  DayHeaderContentArg,
+  EventClickArg,
+  EventInput
+} from "@fullcalendar/core";
 import { ReservationModal } from "@/components/ReservationModal";
 import {
   dateTimeLocalToIso,
@@ -45,6 +50,14 @@ type ModalState =
 const reservationSelect =
   "id, room_id, title, description, start_time, end_time, organizer_user_id, organizer_email, attendees, send_notification, created_at, updated_at, rooms(name, location)";
 
+const todayFormatter = new Intl.DateTimeFormat("ko-KR", {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  weekday: "short"
+});
+const weekdayFormatter = new Intl.DateTimeFormat("ko-KR", { weekday: "short" });
+
 export function ReservationCalendar({
   userEmail,
   userId,
@@ -58,6 +71,7 @@ export function ReservationCalendar({
   const [submitting, setSubmitting] = useState(false);
   const [modal, setModal] = useState<ModalState>(null);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const [todayLabel, setTodayLabel] = useState("");
   const calendarRef = useRef<FullCalendar>(null);
 
   const loadData = useCallback(async () => {
@@ -114,6 +128,20 @@ export function ReservationCalendar({
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    function updateToday() {
+      setTodayLabel(todayFormatter.format(new Date()));
+    }
+
+    updateToday();
+    const timer = window.setInterval(updateToday, 60_000);
+    document.addEventListener("visibilitychange", updateToday);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", updateToday);
+    };
+  }, []);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 767px)");
@@ -303,6 +331,9 @@ export function ReservationCalendar({
               9층 회의실
             </p>
             <h1 className="text-xl font-bold text-ink sm:text-2xl">9층 회의실 예약</h1>
+            {todayLabel && (
+              <p className="mt-1 text-sm font-medium text-accent">오늘 {todayLabel}</p>
+            )}
           </div>
           <div className="flex flex-col gap-2 text-sm sm:items-end">
             <span className="break-all text-muted">{userEmail}</span>
@@ -352,7 +383,7 @@ export function ReservationCalendar({
               headerToolbar={{
                 left: "prev,next today",
                 center: "title",
-                right: "dayGridMonth,timeGridWeek"
+                right: "dayGridMonth,timeGridWeek,timeGridDay"
               }}
               height="auto"
               initialView={isMobile ? "dayGridMonth" : "timeGridWeek"}
@@ -362,7 +393,8 @@ export function ReservationCalendar({
               buttonText={{
                 today: "오늘",
                 month: "월",
-                week: "주"
+                week: "주",
+                day: "일"
               }}
               selectable={!isMobile}
               selectMirror
@@ -380,11 +412,21 @@ export function ReservationCalendar({
               weekends
               views={{
                 dayGridMonth: {
-                  dayCellContent: (info) =>
-                    isMobile ? String(info.date.getDate()) : info.dayNumberText
+                  dayCellContent: (info) => (
+                    <span
+                      aria-current={info.isToday ? "date" : undefined}
+                      className="calendar-month-day"
+                    >
+                      {isMobile ? String(info.date.getDate()) : info.dayNumberText}
+                    </span>
+                  )
                 },
                 timeGridWeek: {
-                  weekends: false
+                  weekends: false,
+                  dayHeaderContent: renderTimeGridHeader
+                },
+                timeGridDay: {
+                  dayHeaderContent: renderTimeGridHeader
                 }
               }}
             />
@@ -408,6 +450,23 @@ export function ReservationCalendar({
         />
       )}
     </main>
+  );
+}
+
+function renderTimeGridHeader(info: DayHeaderContentArg) {
+  return (
+    <span
+      aria-current={info.isToday ? "date" : undefined}
+      aria-label={`${todayFormatter.format(info.date)}${info.isToday ? ", 오늘" : ""}`}
+      className="calendar-day-header"
+    >
+      <span className="calendar-day-header-date">
+        {info.date.getMonth() + 1}.{info.date.getDate()}
+      </span>
+      <span className="calendar-day-header-weekday">
+        ({weekdayFormatter.format(info.date)})
+      </span>
+    </span>
   );
 }
 
