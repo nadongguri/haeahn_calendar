@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-type Mode = "login" | "signup" | "reset" | "updatePassword";
+type Mode = "login" | "reset" | "updatePassword";
 
 const loginAliases: Record<string, string> = {
   meeting: "meeting@haeahn-calendar.local"
@@ -41,19 +41,6 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
         if (signInError) throw signInError;
       }
 
-      if (mode === "signup") {
-        const { error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: redirectTo
-          }
-        });
-        if (signUpError) throw signUpError;
-        setStatus("가입 확인 메일을 보냈습니다. 이메일 인증 후 로그인해 주세요.");
-        setPassword("");
-      }
-
       if (mode === "reset") {
         const { error: resetError } = await supabase.auth.resetPasswordForEmail(
           email,
@@ -83,13 +70,11 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
   }
 
   const title =
-    mode === "signup"
-      ? "회원가입"
-      : mode === "reset"
-        ? "비밀번호 재설정"
-        : mode === "updatePassword"
-          ? "새 비밀번호 설정"
-          : "로그인";
+    mode === "reset"
+      ? "비밀번호 재설정"
+      : mode === "updatePassword"
+        ? "새 비밀번호 설정"
+        : "로그인";
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
@@ -99,8 +84,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
         </p>
         <h1 className="mt-2 text-2xl font-bold text-ink">{title}</h1>
         <p className="mt-2 text-sm leading-6 text-muted">
-          이메일 또는 공용 ID로 로그인하세요. 메일은 회원가입 인증과 비밀번호
-          재설정 때만 발송됩니다.
+          기존 이메일 또는 공용 ID로 로그인하세요. 신규 가입은 일시 중단되었습니다.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
@@ -122,7 +106,7 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
             </label>
           )}
 
-          {(mode === "login" || mode === "signup") && (
+          {mode === "login" && (
             <label className="block">
               <span className="text-sm font-medium text-ink">비밀번호</span>
               <input
@@ -182,15 +166,6 @@ export function AuthPanel({ initialMode, onPasswordUpdated }: AuthPanelProps) {
                 로그인으로 돌아가기
               </button>
             )}
-            {mode !== "signup" && (
-              <button
-                className="font-medium text-accent hover:text-blue-900"
-                type="button"
-                onClick={() => setMode("signup")}
-              >
-                회원가입
-              </button>
-            )}
             {mode !== "reset" && (
               <button
                 className="font-medium text-accent hover:text-blue-900"
@@ -215,10 +190,6 @@ function normalizeLoginIdentifier(identifier: string) {
 function getKoreanAuthError(mode: Mode) {
   if (mode === "login") {
     return "아이디 또는 비밀번호를 확인해 주세요.";
-  }
-
-  if (mode === "signup") {
-    return "회원가입 처리 중 오류가 발생했습니다. 이메일과 비밀번호를 확인해 주세요.";
   }
 
   if (mode === "reset") {

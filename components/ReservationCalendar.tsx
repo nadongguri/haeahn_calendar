@@ -72,11 +72,20 @@ export function ReservationCalendar({
   const [modal, setModal] = useState<ModalState>(null);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [todayLabel, setTodayLabel] = useState("");
+  const [canEditSharedReservations, setCanEditSharedReservations] = useState(false);
   const calendarRef = useRef<FullCalendar>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
+
+    // Missing migration or revoked membership must fall back to owner-only editing.
+    const accessResult = await supabase
+      .from("reservation_editors")
+      .select("user_id")
+      .eq("user_id", userId)
+      .maybeSingle();
+    setCanEditSharedReservations(!accessResult.error && Boolean(accessResult.data));
 
     const roomsResult = await supabase
       .from("rooms")
@@ -123,7 +132,7 @@ export function ReservationCalendar({
     }
 
     setLoading(false);
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
     loadData();
@@ -158,21 +167,20 @@ export function ReservationCalendar({
 
   const events = useMemo<EventInput[]>(() => {
     return reservations.map((reservation) => {
-      const ownReservation = reservation.organizer_user_id === userId;
       const roomName = reservation.rooms?.name ?? "회의실";
       return {
         id: reservation.id,
         title: isMobile ? reservation.title : `${roomName}: ${reservation.title}`,
         start: reservation.start_time,
         end: reservation.end_time,
-        backgroundColor: ownReservation ? "#0e4e96" : "#626d7b",
-        borderColor: ownReservation ? "#0e4e96" : "#626d7b",
+        backgroundColor: "#0e4e96",
+        borderColor: "#0e4e96",
         extendedProps: {
           reservation
         }
       };
     });
-  }, [reservations, userId, isMobile]);
+  }, [reservations, isMobile]);
 
   function openCreateModal(
     selection: Pick<DateSelectArg, "start" | "end" | "allDay">
@@ -220,7 +228,7 @@ export function ReservationCalendar({
     setModalError("");
     setModal({
       kind:
-        reservation.organizer_user_id === userId
+        reservation.organizer_user_id === userId || canEditSharedReservations
           ? "edit"
           : "view",
       start: null,
@@ -285,6 +293,8 @@ export function ReservationCalendar({
             .from("reservations")
             .update(payload)
             .eq("id", modal.reservation.id)
+            .select("id")
+            .single()
         : await supabase.from("reservations").insert({
             ...payload,
             organizer_user_id: userId,
@@ -501,6 +511,10 @@ function toFriendlyReservationError(error: { code?: string; message: string }) {
 
   if (error.code === "42501" || message.includes("row-level security")) {
     return "이 예약을 변경할 권한이 없습니다.";
+  }
+
+  if (error.code === "PGRST116") {
+    return "예약이 삭제되었거나 수정 권한이 변경되었습니다. 새로고침 후 다시 확인해 주세요.";
   }
 
   return error.message;

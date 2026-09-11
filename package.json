@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --max-warnings=0"
+    "lint": "eslint . --max-warnings=0",
+    "test:db": "node --test tests/reservation-access.test.mjs"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.17",
@@ -23,6 +24,7 @@
     "postcss": "$postcss"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@types/node": "^22.15.3",
     "@types/react": "^19.0.12",
     "@types/react-dom": "^19.0.4",

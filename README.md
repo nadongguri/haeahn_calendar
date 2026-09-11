@@ -51,9 +51,22 @@ Open `http://localhost:3000`.
 - 날짜를 눌렀을 때 기본 시간은 09:00~10:00이며, 시작/종료 시간은 08:00~18:00 범위에서 30분 단위로 선택합니다. PC에도 같은 예약 간격이 적용됩니다.
 - 주·일 보기에서는 빈 시간대를 누르면 해당 시간부터 30분이 선택됩니다. 종료 시간은 18:00을 넘지 않습니다.
 - 기존 10분 단위 예약은 유지됩니다. 예약자나 내용만 수정할 수 있으며, 시작/종료 시간을 변경할 때는 30분 단위로 선택합니다.
-- 본인 예약을 누르면 수정하거나 삭제할 수 있습니다. 다른 사용자의 예약은 조회만 가능합니다.
+- 예약은 모두 파란색입니다. 공동 수정 권한이 있는 기존 계정은 다른 사용자의 예약도 수정할 수 있습니다. 삭제는 작성자만 가능합니다.
 - PC에서는 기존 드래그 예약도 지원합니다. 모바일에서는 스크롤과 드래그 선택의 충돌을 피하도록 탭으로 예약합니다.
-- 예약 권한과 중복 방지는 기존 Supabase RLS 및 PostgreSQL 제약조건을 사용합니다. 추가 DB 설정은 필요하지 않습니다.
+- 예약 권한과 중복 방지는 Supabase RLS 및 PostgreSQL 제약조건을 사용합니다. 공동 수정은 아래 추가 SQL 적용이 필요합니다.
+
+## 신규 가입 중단 및 공동 수정
+
+1. Supabase > Authentication > Sign In / Providers에서 `Allow new users to sign up`을 끄고 저장합니다. **버튼만 숨겨서는 API 가입을 차단할 수 없습니다.** Email provider와 Confirm email은 켜 둡니다. 기존 로그인과 비밀번호 재설정은 유지됩니다.
+2. SQL Editor에서 `supabase/shared-editing.sql`을 **한 번만** 실행합니다. 실행 시점의 기존 계정만 `reservation_editors`에 등록됩니다. 이후 계정은 자동 등록되지 않습니다. 재실행은 오류로 전체 롤백되어 권한이 추가되지 않습니다.
+3. 이 목록의 계정은 모든 예약을 수정할 수 있습니다. 예약 ID, 최초 생성 계정·이메일·생성 시각은 DB 트리거로 보호합니다. 삭제는 기존 작성자 전용 정책을 유지합니다. 미인증 계정은 기존 이메일 인증을 마쳐야 로그인할 수 있습니다.
+4. 앱을 배포하고 새로고침합니다. SQL 미적용 또는 권한 조회 실패 시 본인 예약만 수정할 수 있도록 동작합니다. 다른 계정 예약의 색상도 파란색으로 통일됩니다.
+
+공동 수정만 해제하려면 `supabase/disable-shared-editing.sql`을 실행합니다. 계정과 예약은 삭제하지 않고 예외 권한만 회수합니다. 특정 계정만 회수하려면 관리자가 `reservation_editors`에서 해당 사용자 행을 삭제합니다. 기존 화면이 열려 있어도 저장 시 DB가 권한을 다시 검사합니다.
+
+`npm run test:db`로 로컬 PGlite PostgreSQL에서 RLS, 공동 수정, 소유권 보호, 삭제 제한, 중복 예약, 예외 권한 회수 및 재실행 보호를 검증합니다. 운영 Supabase에는 연결하지 않습니다.
+
+가입을 재개하려면 가입 UI와 Supabase 설정을 모두 복원해야 합니다. 공동 수정 대상은 별도로 관리해야 하며, 신규 가입 재개만으로 추가 권한을 주지 않습니다. 동시 편집은 마지막 저장이 적용되므로 변경 이력·충돌 감지는 추후 개선 사항입니다.
 
 ## Environment Variables
 
@@ -72,7 +85,7 @@ Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are required
 
 1. Create a Supabase project.
 2. Go to Authentication > Providers > Email.
-3. Enable Email provider and Email/password signups.
+3. Enable Email provider. Keep `Allow new users to sign up` OFF during the signup pause; provision any approved accounts through the administrator.
 4. Keep email confirmations enabled for signup verification.
 5. Do not enable Magic Link or OTP as the normal login flow.
 6. Set Site URL to your local URL while developing, for example `http://localhost:3000`.
@@ -80,6 +93,7 @@ Only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are required
 8. Open SQL Editor and run `supabase/schema.sql`.
 9. Run `supabase/seed.sql` to add sample meeting rooms.
 10. If older sample rooms already exist, run `supabase/single-room.sql` once to keep only `9층 회의실` active.
+11. After reviewing existing accounts, run `supabase/shared-editing.sql` once to enable temporary shared editing.
 
 For production, configure a custom SMTP provider in Supabase Auth so signup verification and password reset emails are reliable.
 
@@ -158,7 +172,8 @@ RLS summary:
 - Authenticated users can view active rooms.
 - Authenticated users can view all reservations.
 - Authenticated users can create only reservations where `organizer_user_id = auth.uid()` and `organizer_email` matches the JWT email.
-- Users can update/delete only their own reservations.
+- Users can update their own reservations; the temporary `reservation_editors` membership additionally permits cross-user updates after `supabase/shared-editing.sql` is applied.
+- Only organizers can delete reservations. A trigger prevents edits from transferring ownership.
 
 Conflict prevention is enforced at the database level by the `reservations_room_time_no_overlap` PostgreSQL exclusion constraint. The UI translates that database error into a clear “room already booked” message.
 
@@ -209,9 +224,11 @@ Supabase Auth emails for signup verification and password reset still work throu
 - [ ] Create Supabase project.
 - [ ] Enable email/password Auth.
 - [ ] Keep signup email confirmation enabled.
+- [ ] Disable `Allow new users to sign up` in Supabase during the signup pause.
 - [ ] Add local and deployed redirect URLs in Supabase Auth settings.
 - [ ] Run `supabase/schema.sql`.
 - [ ] Run `supabase/seed.sql`.
+- [ ] Review existing users and run `supabase/shared-editing.sql` once if shared editing is intended.
 - [ ] Copy `.env.example` to `.env.local`.
 - [ ] Set Supabase URL and anon key.
 - [ ] Run `npm install`.
@@ -223,6 +240,7 @@ Supabase Auth emails for signup verification and password reset still work throu
 ## Future Improvements
 
 - Admin role for room CRUD and cross-user reservation management.
+- Shared-edit audit history and optimistic concurrency checks.
 - Organization/domain allowlist for signups.
 - Recurring reservations.
 - Room filters by capacity, location, or equipment.
